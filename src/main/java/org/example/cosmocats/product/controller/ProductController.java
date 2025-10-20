@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/v1/products")
 public class ProductController {
 
     private final ProductService productService;
@@ -20,19 +20,29 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductDto> getAll() { return productService.findAll(); }
+    public List<ProductDto> getAll() {
+        return productService.findAll();
+    }
 
     @GetMapping("/{id}")
-    public ProductDto getOne(@PathVariable("id") Long id) { return productService.findById(id); }
+    public ProductDto getOne(@PathVariable("id") Long id) {
+        return productService.findById(id);
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductDto create(@Validated @RequestBody ProductCreateUpdateDto dto) { return productService.create(dto); }
+    public ProductDto create(@Validated @RequestBody ProductCreateUpdateDto dto) {
+        return productService.create(dto);
+    }
 
     @PutMapping("/{id}")
-    public ProductDto update(@PathVariable("id") Long id, @Validated @RequestBody ProductCreateUpdateDto dto) { return productService.update(id, dto); }
+    public ProductDto update(@PathVariable("id") Long id, @Validated @RequestBody ProductCreateUpdateDto dto) {
+        return productService.update(id, dto);
+    }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("id") Long id) { productService.delete(id); }
+    public void delete(@PathVariable("id") Long id) {
+        productService.delete(id); // ідемпотентно
+    }
 }
