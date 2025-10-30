@@ -30,10 +30,10 @@ class ProductControllerIT {
     void setUp() {
         productService = mock(ProductService.class);
 
-        // якщо у твого контролера інший конструктор — підстав потрібні залежності тут
+        
         var controller = new ProductController(productService);
 
-        // валідація + глобальний хендлер, як у проді
+        
         var validator = new LocalValidatorFactoryBean();
         validator.afterPropertiesSet();
 
