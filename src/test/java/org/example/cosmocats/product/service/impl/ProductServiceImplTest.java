@@ -117,7 +117,7 @@ class ProductServiceImplTest {
 
     @Test
     void update_throws_onInvalidDto() {
-        // без жодних when(...) — валідатор має впасти до звернення в repo
+        
         assertAll(
             () -> assertThrows(ValidationException.class,
                     () -> service.update(1L, new ProductCreateUpdateDto("  ", "z", 12.0))),
