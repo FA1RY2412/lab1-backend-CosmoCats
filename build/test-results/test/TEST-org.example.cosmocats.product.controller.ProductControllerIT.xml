@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.cosmocats.product.controller.ProductControllerIT" tests="3" skipped="0" failures="0" errors="0" timestamp="2025-10-30T18:12:11" hostname="PIGEON" time="4.657">
+  <properties/>
+  <testcase name="list_ok()" classname="org.example.cosmocats.product.controller.ProductControllerIT" time="4.344"/>
+  <testcase name="delete_noContent()" classname="org.example.cosmocats.product.controller.ProductControllerIT" time="0.068"/>
+  <testcase name="create_2xx()" classname="org.example.cosmocats.product.controller.ProductControllerIT" time="0.242"/>
+  <system-out><![CDATA[20:12:14.153 [Test worker] INFO org.hibernate.validator.internal.util.Version -- HV000001: Hibernate Validator 8.0.1.Final
+20:12:15.906 [Test worker] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+20:12:15.906 [Test worker] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+20:12:15.917 [Test worker] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 11 ms
+20:12:16.324 [Test worker] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+20:12:16.324 [Test worker] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+20:12:16.324 [Test worker] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+20:12:16.385 [Test worker] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+20:12:16.385 [Test worker] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+20:12:16.385 [Test worker] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
