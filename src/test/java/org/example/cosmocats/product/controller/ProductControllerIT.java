@@ -31,8 +31,8 @@ class ProductControllerIT {
     @Autowired
     ObjectMapper om;
     
-    //@MockBean
-    //ProductService productService;
+    @MockBean
+    ProductService productService;
 
     @Test
     void list_ok() throws Exception {
