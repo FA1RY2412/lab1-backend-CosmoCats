@@ -1,5 +1,6 @@
 package org.example.cosmocats.product.controller;
 
+import jakarta.validation.Valid; // ← додано
 import org.example.cosmocats.product.dto.ProductCreateUpdateDto;
 import org.example.cosmocats.product.dto.ProductDto;
 import org.example.cosmocats.product.service.ProductService;
@@ -20,29 +21,30 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductDto> getAll() {
+    public List<ProductDto> list() {
         return productService.findAll();
     }
 
     @GetMapping("/{id}")
-    public ProductDto getOne(@PathVariable("id") Long id) {
+    public ProductDto get(@PathVariable("id") Long id) {
         return productService.findById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductDto create(@Validated @RequestBody ProductCreateUpdateDto dto) {
+    public ProductDto create(@Valid @RequestBody ProductCreateUpdateDto dto) { // ← @Valid
         return productService.create(dto);
     }
 
     @PutMapping("/{id}")
-    public ProductDto update(@PathVariable("id") Long id, @Validated @RequestBody ProductCreateUpdateDto dto) {
+    public ProductDto update(@PathVariable("id") Long id,
+                             @Valid @RequestBody ProductCreateUpdateDto dto) { // ← @Valid
         return productService.update(id, dto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("id") Long id) {
-        productService.delete(id); // ідемпотентно
+        productService.delete(id);
     }
 }
