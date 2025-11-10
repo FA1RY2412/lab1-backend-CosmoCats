@@ -1,0 +1,17 @@
+{
+  "groups": [
+    {
+      "name": "feature-toggle",
+      "type": "org.example.cosmocats.config.FeatureToggleProperties",
+      "sourceType": "org.example.cosmocats.config.FeatureToggleProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "feature-toggle.toggles",
+      "type": "java.util.Map<java.lang.String,java.lang.Boolean>",
+      "sourceType": "org.example.cosmocats.config.FeatureToggleProperties"
+    }
+  ],
+  "hints": []
+}
