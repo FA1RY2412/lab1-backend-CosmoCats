@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ "1.2", "Denis-lab1", "main" ]
+    branches: [ "1.2", "Denis-lab1", "main", "lab2-from-main" ]
   pull_request:
     branches: [ "Denis-lab1", "main" ]
 
