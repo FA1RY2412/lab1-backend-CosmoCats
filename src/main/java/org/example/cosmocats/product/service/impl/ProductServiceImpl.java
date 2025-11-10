@@ -1,5 +1,6 @@
 package org.example.cosmocats.product.service.impl;
 
+import org.example.cosmocats.common.exception.ValidationException;
 import org.example.cosmocats.product.dto.ProductCreateUpdateDto;
 import org.example.cosmocats.product.dto.ProductDto;
 import org.example.cosmocats.product.entity.Product;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -29,19 +29,20 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public List<ProductDto> findAll() {
-        return productRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
+        return productRepository.findAll().stream().map(this::toDto).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public ProductDto findById(Long id) {
         Product p = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product id=" + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product id=%d not found".formatted(id)));
         return toDto(p);
     }
 
     @Override
     public ProductDto create(ProductCreateUpdateDto dto) {
+        validate(dto);
         Product p = new Product(dto.getName(), dto.getDescription(), dto.getPrice());
         Product saved = productRepository.save(p);
         return toDto(saved);
@@ -49,8 +50,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDto update(Long id, ProductCreateUpdateDto dto) {
+        validate(dto);
         Product p = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product id=" + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product id=%d not found".formatted(id)));
         p.setName(dto.getName());
         p.setDescription(dto.getDescription());
         p.setPrice(dto.getPrice());
@@ -59,11 +61,21 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void delete(Long id) {
-        // Idempotent DELETE: multiple calls yield the same state; ignore if not present
-        try {
+        
+        if (productRepository.existsById(id)) {
             productRepository.deleteById(id);
-        } catch (org.springframework.dao.EmptyResultDataAccessException ex) {
-            // ignore: resource already absent
+        }
+    }
+
+    private void validate(ProductCreateUpdateDto dto) {
+        if (dto.getName() == null || dto.getName().isBlank()) {
+            throw new ValidationException("name is required");
+        }
+        if (dto.getPrice() == null) {
+            throw new ValidationException("price is required");
+        }
+        if (dto.getPrice() <= 0) {
+            throw new ValidationException("price must be > 0");
         }
     }
 }
