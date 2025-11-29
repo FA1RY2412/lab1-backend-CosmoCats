@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.cosmocats.category.service.impl.CategoryServiceImplTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2025-11-29T11:23:35" hostname="PIGEON" time="0.295">
+  <properties/>
+  <testcase name="delete_callsRepository()" classname="org.example.cosmocats.category.service.impl.CategoryServiceImplTest" time="0.265"/>
+  <testcase name="create_duplicateCode_throwsValidationException()" classname="org.example.cosmocats.category.service.impl.CategoryServiceImplTest" time="0.008"/>
+  <testcase name="findAll_returnsMappedDtos()" classname="org.example.cosmocats.category.service.impl.CategoryServiceImplTest" time="0.006"/>
+  <testcase name="create_success()" classname="org.example.cosmocats.category.service.impl.CategoryServiceImplTest" time="0.004"/>
+  <testcase name="update_notFound_throwsResourceNotFound()" classname="org.example.cosmocats.category.service.impl.CategoryServiceImplTest" time="0.004"/>
+  <testcase name="findById_notFound_throwsResourceNotFound()" classname="org.example.cosmocats.category.service.impl.CategoryServiceImplTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: cosmo-cats-db
+    environment:
+      POSTGRES_DB: cosmo_cats
+      POSTGRES_USER: cosmo
+      POSTGRES_PASSWORD: cosmo
+    ports:
+      - "5432:5432"
+    volumes:
+      - cosmo_cats_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cosmo -d cosmo_cats"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: cosmo-cats-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: cosmo_cats
+      DB_USERNAME: cosmo
+      DB_PASSWORD: cosmo
+      SPRING_PROFILES_ACTIVE: prod
+    ports:
+      - "8080:8080"
+
+volumes:
+  cosmo_cats_data:

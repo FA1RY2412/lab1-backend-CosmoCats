@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FeatureToggleAspect.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CosmoCats</a> &gt; <a href="index.source.html" class="el_package">org.example.cosmocats.featuretoggle.aspect</a> &gt; <span class="el_source">FeatureToggleAspect.java</span></div><h1>FeatureToggleAspect.java</h1><pre class="source lang-java linenums">package org.example.cosmocats.featuretoggle.aspect;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.example.cosmocats.featuretoggle.FeatureToggleService;
+import org.example.cosmocats.featuretoggle.FeatureToggles;
+import org.example.cosmocats.featuretoggle.annotation.FeatureToggle;
+import org.example.cosmocats.featuretoggle.exception.DisabledFeatureToggleException;
+import org.springframework.stereotype.Component;
+
+<span class="fc" id="L14">@Slf4j</span>
+@Aspect
+@Component
+@RequiredArgsConstructor
+public class FeatureToggleAspect {
+
+  private final FeatureToggleService featureToggleService;
+
+  @Around(&quot;@annotation(featureToggle)&quot;)
+  public Object aroundFeatureToggle(ProceedingJoinPoint joinPoint, FeatureToggle featureToggle) throws Throwable {
+<span class="fc" id="L24">    FeatureToggles toggle = featureToggle.value();</span>
+<span class="fc" id="L25">    String featureName = toggle.getFeatureName();</span>
+
+<span class="fc bfc" id="L27" title="All 2 branches covered.">    if (!featureToggleService.checkFeatureToggle(featureName)) {</span>
+<span class="fc" id="L28">      log.warn(&quot;Feature toggle {} is disabled&quot;, featureName);</span>
+<span class="fc" id="L29">      throw new DisabledFeatureToggleException(featureName);</span>
+    }
+
+<span class="fc" id="L32">    return joinPoint.proceed();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
