@@ -1,7 +1,7 @@
 package org.example.cosmocats.order.repository;
 
 import org.example.cosmocats.product.projection.ProductSalesProjection;
-import org.example.cosmocats.order.entity.Order;
+import org.example.cosmocats.order.entity.OrderLine;
 import org.example.cosmocats.product.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
