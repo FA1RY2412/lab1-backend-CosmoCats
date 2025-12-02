@@ -6,19 +6,13 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class FeatureToggleService {
 
-    private final Map<String, Boolean> featureToggleMap;
+    private final FeatureToggleProperties properties;
 
-    public FeatureToggleService(FeatureToggleProperties featureToggleProperties) {
-        this.featureToggleMap = Map.copyOf(featureToggleProperties.getToggles());
-    }
-
-    public boolean checkFeatureToggle(String featureName) {
-        return featureToggleMap.getOrDefault(featureName, false);
-    }
-
-    public boolean checkFeatureToggle(FeatureToggles toggle) {
-        return checkFeatureToggle(toggle.getFeatureName());
+    public boolean isEnabled(String feature) {
+        return properties.getToggles().getOrDefault(feature, false);
     }
 }
+
