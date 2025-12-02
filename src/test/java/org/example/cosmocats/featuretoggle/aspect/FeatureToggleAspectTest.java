@@ -19,49 +19,56 @@ import static org.mockito.Mockito.*;
 class FeatureToggleAspectTest {
 
     @Mock
-    private FeatureToggleService featureToggleService;
-
-    @Mock
-    private ProceedingJoinPoint joinPoint;
-
-    @Mock
-    private FeatureToggle featureToggle;
+    FeatureToggleService featureToggleService;
 
     @InjectMocks
-    private FeatureToggleAspect aspect;
+    FeatureToggleAspect aspect;
+
+    private FeatureToggle cosmoCatsAnnotation() {
+        return new FeatureToggle() {
+            @Override
+            public FeatureToggles value() {
+                return FeatureToggles.COSMO_CATS;
+            }
+
+            @Override
+            public Class<? extends java.lang.annotation.Annotation> annotationType() {
+                return FeatureToggle.class;
+            }
+        };
+    }
 
     @Test
-    void aroundFeatureToggle_whenEnabled_proceeds() throws Throwable {
-        
-        when(featureToggle.value()).thenReturn(FeatureToggles.COSMO_CATS);
-        when(featureToggleService.checkFeatureToggle("cosmo-cats")).thenReturn(true);
-        when(joinPoint.proceed()).thenReturn("ok");
+    void whenFeatureEnabled_allowsMethodExecution() throws Throwable {
+        ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
+        FeatureToggle annotation = cosmoCatsAnnotation();
 
-        
-        Object result = aspect.aroundFeatureToggle(joinPoint, featureToggle);
+        when(featureToggleService.isEnabled("cosmo-cats")).thenReturn(true);
+        when(joinPoint.proceed()).thenReturn("OK");
 
-        
-        assertEquals("ok", result);
-        verify(featureToggleService).checkFeatureToggle("cosmo-cats");
+        Object result = aspect.aroundFeatureToggle(joinPoint, annotation);
+
+        assertEquals("OK", result);
+        verify(featureToggleService).isEnabled("cosmo-cats");
         verify(joinPoint).proceed();
     }
 
     @Test
-    void aroundFeatureToggle_whenDisabled_throwsException() throws Throwable {
-        
-        when(featureToggle.value()).thenReturn(FeatureToggles.COSMO_CATS);
-        when(featureToggleService.checkFeatureToggle("cosmo-cats")).thenReturn(false);
+    void whenFeatureDisabled_throwsExceptionAndDoesNotProceed() throws Throwable {
+        ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
+        FeatureToggle annotation = cosmoCatsAnnotation();
 
-        
+        when(featureToggleService.isEnabled("cosmo-cats")).thenReturn(false);
+
         DisabledFeatureToggleException ex = assertThrows(
                 DisabledFeatureToggleException.class,
-                () -> aspect.aroundFeatureToggle(joinPoint, featureToggle)
+                () -> aspect.aroundFeatureToggle(joinPoint, annotation)
         );
 
         org.assertj.core.api.Assertions.assertThat(ex.getMessage())
                 .contains("cosmo-cats");
-        verify(featureToggleService).checkFeatureToggle("cosmo-cats");
+
+        verify(featureToggleService).isEnabled("cosmo-cats");
         verify(joinPoint, never()).proceed();
     }
-
 }
