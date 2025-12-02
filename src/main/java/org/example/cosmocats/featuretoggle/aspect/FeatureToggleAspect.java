@@ -17,18 +17,20 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class FeatureToggleAspect {
 
-  private final FeatureToggleService featureToggleService;
+    private final FeatureToggleService featureToggleService;
 
-  @Around("@annotation(featureToggle)")
-  public Object aroundFeatureToggle(ProceedingJoinPoint joinPoint, FeatureToggle featureToggle) throws Throwable {
-    FeatureToggles toggle = featureToggle.value();
-    String featureName = toggle.getFeatureName();
+    @Around("@annotation(featureToggle)")
+    public Object aroundFeatureToggle(ProceedingJoinPoint joinPoint,
+                                      FeatureToggle featureToggle) throws Throwable {
 
-    if (!featureToggleService.isEnabled(featureName)) {
-      log.warn("Feature toggle {} is disabled", featureName);
-      throw new DisabledFeatureToggleException(featureName);
+        FeatureToggles toggle = featureToggle.value();
+        String featureName = toggle.getFeatureName();
+
+        if (!featureToggleService.isEnabled(featureName)) {
+            log.warn("Feature toggle {} is disabled", featureName);
+            throw new DisabledFeatureToggleException(featureName);
+        }
+
+        return joinPoint.proceed();
     }
-
-    return joinPoint.proceed();
-  }
 }
