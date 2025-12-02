@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="org.example.cosmocats.featuretoggle.aspect.FeatureToggleAspectTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-11-29T11:23:36" hostname="PIGEON" time="0.223">
-  <properties/>
-  <testcase name="aroundFeatureToggle_whenDisabled_throwsException()" classname="org.example.cosmocats.featuretoggle.aspect.FeatureToggleAspectTest" time="0.212"/>
-  <testcase name="aroundFeatureToggle_whenEnabled_proceeds()" classname="org.example.cosmocats.featuretoggle.aspect.FeatureToggleAspectTest" time="0.006"/>
-  <system-out><![CDATA[2025-11-29T13:23:36.420+02:00  WARN 15984 --- [    Test worker] o.e.c.f.aspect.FeatureToggleAspect       : Feature toggle cosmo-cats is disabled
-]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
