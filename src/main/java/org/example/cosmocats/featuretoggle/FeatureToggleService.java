@@ -1,10 +1,8 @@
 package org.example.cosmocats.featuretoggle;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.example.cosmocats.config.FeatureToggleProperties;
-
-import java.util.Map;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -13,7 +11,7 @@ public class FeatureToggleService {
     private final FeatureToggleProperties properties;
 
     public boolean isEnabled(String featureName) {
-        Map<String, Boolean> toggles = properties.getToggles();
-        return toggles.getOrDefault(featureName, false);
+        Boolean value = properties.getToggles().get(featureName);
+        return Boolean.TRUE.equals(value);
     }
 }
