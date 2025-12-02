@@ -24,7 +24,7 @@ public class FeatureToggleAspect {
     FeatureToggles toggle = featureToggle.value();
     String featureName = toggle.getFeatureName();
 
-    if (!featureToggleService.checkFeatureToggle(featureName)) {
+    if (!featureToggleService.isEnabled(featureName)) {
       log.warn("Feature toggle {} is disabled", featureName);
       throw new DisabledFeatureToggleException(featureName);
     }
