@@ -2,6 +2,7 @@ package org.example.cosmocats.featuretoggle;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.example.cosmocats.config.FeatureToggleProperties;
 
 import java.util.Map;
 
