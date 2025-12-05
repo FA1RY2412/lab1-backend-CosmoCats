@@ -25,11 +25,11 @@ public class OrderLine {
         return id;
     }
 
-    public Order getOrder() {
+    public OrderEntity getOrder() {
         return order;
     }
-
-    public void setOrder(Order order) {
+    
+    public void setOrder(OrderEntity order) {
         this.order = order;
     }
 
