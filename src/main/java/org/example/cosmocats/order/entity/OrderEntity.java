@@ -46,10 +46,10 @@ public class OrderEntity {
     )
     private List<Product> products = new ArrayList<>();
 
-    public Order() {
+    public OrderEntity() {
     }
 
-    public Order(String number, String customerName, String status) {
+    public OrderEntity(String number, String customerName, String status) {
         this.number = number;
         this.customerName = customerName;
         this.status = status;
