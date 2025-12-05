@@ -4,7 +4,7 @@ import org.example.cosmocats.common.exception.ResourceNotFoundException;
 import org.example.cosmocats.common.exception.ValidationException;
 import org.example.cosmocats.order.dto.OrderCreateUpdateDto;
 import org.example.cosmocats.order.dto.OrderDto;
-import org.example.cosmocats.order.entity.Order;
+import org.example.cosmocats.order.entity.OrderEntity;
 import org.example.cosmocats.order.repository.OrderRepository;
 import org.example.cosmocats.order.service.OrderService;
 import org.example.cosmocats.product.entity.Product;
@@ -17,19 +17,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.assertThat;
-
-
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -52,12 +45,11 @@ class OrderServiceImplTest {
         dto.setStatus("NEW");
         dto.setProductIds(List.of(2L));
 
-     
         Product p = new Product();
+        p.setId(2L);
+
         when(productRepository.findAllById(List.of(2L))).thenReturn(List.of(p));
-
-
-        when(orderRepository.save(any(Order.class)))
+        when(orderRepository.save(any(OrderEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         OrderDto result = service.create(dto);
@@ -69,9 +61,8 @@ class OrderServiceImplTest {
         assertNotNull(result.getProductIds());
         assertEquals(1, result.getProductIds().size());
 
-        verify(orderRepository).save(any(Order.class));
+        verify(orderRepository).save(any(OrderEntity.class));
     }
-
 
     @Test
     void create_withoutNumber_throwsValidation() {
@@ -90,7 +81,7 @@ class OrderServiceImplTest {
         dto.setNumber("ORD-002");
         dto.setCustomerName("Cat");
         dto.setStatus("NEW");
-        dto.setProductIds(List.of()); 
+        dto.setProductIds(List.of());
 
         assertThrows(ValidationException.class, () -> service.create(dto));
         verify(orderRepository, never()).save(any());
@@ -99,6 +90,7 @@ class OrderServiceImplTest {
     @Test
     void findById_notFound_throwsResourceNotFound() {
         when(orderRepository.findById(42L)).thenReturn(Optional.empty());
+
         assertThrows(ResourceNotFoundException.class, () -> service.findById(42L));
     }
 
@@ -110,15 +102,14 @@ class OrderServiceImplTest {
     @Test
     void create_throwsValidation_whenNumberBlank() {
         OrderCreateUpdateDto dto = new OrderCreateUpdateDto();
-        dto.setNumber("   ");                
-        dto.setProductIds(List.of(1L));      
+        dto.setNumber("   ");
+        dto.setProductIds(List.of(1L));
 
         ValidationException ex = assertThrows(
                 ValidationException.class,
                 () -> service.create(dto)
         );
 
-        
         assertTrue(ex.getMessage().contains("number"));
     }
 
@@ -126,7 +117,7 @@ class OrderServiceImplTest {
     void create_throwsValidation_whenProductIdsEmpty() {
         OrderCreateUpdateDto dto = new OrderCreateUpdateDto();
         dto.setNumber("ORD-1");
-        dto.setProductIds(List.of());        
+        dto.setProductIds(List.of());
 
         ValidationException ex = assertThrows(
                 ValidationException.class,
@@ -135,9 +126,10 @@ class OrderServiceImplTest {
 
         assertTrue(ex.getMessage().contains("productIds"));
     }
+
     @Test
     void findAll_returnsListOfDtos() {
-        Order o1 = new Order("ORD-1", "Cat One", "NEW");
+        OrderEntity o1 = new OrderEntity("ORD-1", "Cat One", "NEW");
         o1.setId(1L);
 
         Product p = new Product();
@@ -161,7 +153,7 @@ class OrderServiceImplTest {
 
     @Test
     void findByNumber_returnsDto() {
-        Order o = new Order("ORD-777", "Space Cat", "PAID");
+        OrderEntity o = new OrderEntity("ORD-777", "Space Cat", "PAID");
         o.setId(7L);
 
         Product p = new Product();
@@ -203,7 +195,6 @@ class OrderServiceImplTest {
         Product existing = new Product();
         existing.setId(1L);
 
-        
         when(productRepository.findAllById(dto.getProductIds()))
                 .thenReturn(List.of(existing));
 
@@ -220,7 +211,7 @@ class OrderServiceImplTest {
     void update_successfullyUpdatesOrder() {
         Long id = 5L;
 
-        Order existing = new Order("OLD-1", "Old Cat", "NEW");
+        OrderEntity existing = new OrderEntity("OLD-1", "Old Cat", "NEW");
         existing.setId(id);
         existing.setProducts(List.of());
 
@@ -239,7 +230,7 @@ class OrderServiceImplTest {
         when(productRepository.findAllById(dto.getProductIds()))
                 .thenReturn(List.of(product));
 
-        when(orderRepository.save(any(Order.class)))
+        when(orderRepository.save(any(OrderEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         OrderDto result = service.update(id, dto);
@@ -257,7 +248,7 @@ class OrderServiceImplTest {
     void update_throwsValidation_whenSomeProductsNotFound() {
         Long id = 10L;
 
-        Order existing = new Order("ORD-OLD", "Someone", "NEW");
+        OrderEntity existing = new OrderEntity("ORD-OLD", "Someone", "NEW");
         existing.setId(id);
 
         when(orderRepository.findById(id))
@@ -293,7 +284,4 @@ class OrderServiceImplTest {
         verify(orderRepository).existsById(100L);
         verify(orderRepository).deleteById(100L);
     }
-
-
-
 }
