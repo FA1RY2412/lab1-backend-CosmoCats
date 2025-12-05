@@ -13,7 +13,7 @@ public class OrderLine {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "order_id")
-    private Order order;
+    private OrderEntity order;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "product_id")
