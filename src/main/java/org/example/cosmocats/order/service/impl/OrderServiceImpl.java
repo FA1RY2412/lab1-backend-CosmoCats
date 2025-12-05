@@ -13,6 +13,7 @@ import org.example.cosmocats.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -28,63 +29,134 @@ public class OrderServiceImpl implements OrderService {
         this.productRepository = productRepository;
     }
 
-    private OrderDto toDto(Order o) {
-        List<Long> productIds = o.getProducts().stream()
+    
+
+    private Order toDomain(OrderEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        Order domain = new Order();
+        domain.setId(entity.getId());
+        domain.setNumber(entity.getNumber());
+        domain.setCustomerName(entity.getCustomerName());
+        domain.setStatus(entity.getStatus());
+        domain.setCreatedAt(entity.getCreatedAt());
+
+        List<Long> productIds = entity.getProducts().stream()
                 .map(Product::getId)
                 .toList();
-        return new OrderDto(o.getId(), o.getNumber(), o.getCustomerName(), o.getStatus(), o.getCreatedAt(), productIds);
+        domain.setProductIds(productIds);
+
+        return domain;
     }
+
+    
+
+    private OrderEntity toEntity(Order domain, List<Product> products) {
+        if (domain == null) {
+            return null;
+        }
+
+        OrderEntity entity = new OrderEntity();
+        entity.setId(domain.getId());
+        entity.setNumber(domain.getNumber());
+        entity.setCustomerName(domain.getCustomerName());
+        entity.setStatus(domain.getStatus());
+        entity.setCreatedAt(domain.getCreatedAt());
+        entity.setProducts(products);
+
+        return entity;
+    }
+
+    
+
+    private OrderDto toDto(Order o) {
+        return new OrderDto(
+                o.getId(),
+                o.getNumber(),
+                o.getCustomerName(),
+                o.getStatus(),
+                o.getCreatedAt(),
+                o.getProductIds()
+        );
+    }
+
+   
 
     @Override
     @Transactional(readOnly = true)
     public List<OrderDto> findAll() {
-        return orderRepository.findAll().stream().map(this::toDto).toList();
+        return orderRepository.findAll().stream()
+                .map(this::toDomain)
+                .map(this::toDto)
+                .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public OrderDto findById(Long id) {
-        Order o = orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Order id=%d not found".formatted(id)));
-        return toDto(o);
+        OrderEntity entity = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Order id=%d not found".formatted(id)
+                ));
+
+        return toDto(toDomain(entity));
     }
 
     @Override
     @Transactional(readOnly = true)
     public OrderDto findByNumber(String number) {
-        Order o = orderRepository.findByNumber(number)
-                .orElseThrow(() -> new ResourceNotFoundException("Order number=%s not found".formatted(number)));
-        return toDto(o);
+        OrderEntity entity = orderRepository.findByNumber(number)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Order number=%s not found".formatted(number)
+                ));
+
+        return toDto(toDomain(entity));
     }
 
     @Override
     public OrderDto create(OrderCreateUpdateDto dto) {
         validate(dto);
-        Order o = new Order(dto.getNumber(), dto.getCustomerName(), dto.getStatus());
-        List<Product> products = productRepository.findAllById(dto.getProductIds());
-        if (products.size() != dto.getProductIds().size()) {
-            throw new ValidationException("Some products not found for ids: " + dto.getProductIds());
+
+        Order domain = new Order();
+        domain.setNumber(dto.getNumber());
+        domain.setCustomerName(dto.getCustomerName());
+        domain.setStatus(dto.getStatus());
+        domain.setCreatedAt(Instant.now());
+        domain.setProductIds(dto.getProductIds());
+
+        List<Product> products = productRepository.findAllById(domain.getProductIds());
+        if (products.size() != domain.getProductIds().size()) {
+            throw new ValidationException("Some products not found for ids: " + domain.getProductIds());
         }
-        o.setProducts(products);
-        return toDto(orderRepository.save(o));
+
+        OrderEntity saved = orderRepository.save(toEntity(domain, products));
+        return toDto(toDomain(saved));
     }
 
     @Override
     public OrderDto update(Long id, OrderCreateUpdateDto dto) {
         validate(dto);
-        Order o = orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Order id=%d not found".formatted(id)));
-        o.setNumber(dto.getNumber());
-        o.setCustomerName(dto.getCustomerName());
-        o.setStatus(dto.getStatus());
 
-        List<Product> products = productRepository.findAllById(dto.getProductIds());
-        if (products.size() != dto.getProductIds().size()) {
-            throw new ValidationException("Some products not found for ids: " + dto.getProductIds());
+        OrderEntity existing = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Order id=%d not found".formatted(id)
+                ));
+
+        Order domain = toDomain(existing);
+        domain.setNumber(dto.getNumber());
+        domain.setCustomerName(dto.getCustomerName());
+        domain.setStatus(dto.getStatus());
+        domain.setProductIds(dto.getProductIds());
+
+        List<Product> products = productRepository.findAllById(domain.getProductIds());
+        if (products.size() != domain.getProductIds().size()) {
+            throw new ValidationException("Some products not found for ids: " + domain.getProductIds());
         }
-        o.setProducts(products);
 
-        return toDto(orderRepository.save(o));
+        OrderEntity saved = orderRepository.save(toEntity(domain, products));
+        return toDto(toDomain(saved));
     }
 
     @Override
