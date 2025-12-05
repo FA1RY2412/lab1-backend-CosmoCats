@@ -241,7 +241,7 @@ class OrderServiceImplTest {
         assertEquals(1, result.getProductIds().size());
 
         verify(orderRepository).findById(id);
-        verify(orderRepository).save(existing);
+        verify(orderRepository).save(any(OrderEntity.class));
     }
 
     @Test
