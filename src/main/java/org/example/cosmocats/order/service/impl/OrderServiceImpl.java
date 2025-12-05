@@ -1,11 +1,12 @@
 package org.example.cosmocats.order.service.impl;
 
-import org.example.cosmocats.common.exception.ResourceNotFoundException;
 import org.example.cosmocats.common.exception.ValidationException;
 import org.example.cosmocats.order.dto.OrderCreateUpdateDto;
 import org.example.cosmocats.order.dto.OrderDto;
 import org.example.cosmocats.order.domain.Order;
 import org.example.cosmocats.order.entity.OrderEntity;
+import org.example.cosmocats.order.exception.OrderNotFoundException;
+import org.example.cosmocats.order.exception.ProductsForOrderNotFoundException;
 import org.example.cosmocats.order.repository.OrderRepository;
 import org.example.cosmocats.order.service.OrderService;
 import org.example.cosmocats.product.entity.Product;
@@ -97,9 +98,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(readOnly = true)
     public OrderDto findById(Long id) {
         OrderEntity entity = orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Order id=%d not found".formatted(id)
-                ));
+                .orElseThrow(() -> new OrderNotFoundException(id));
 
         return toDto(toDomain(entity));
     }
@@ -108,9 +107,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(readOnly = true)
     public OrderDto findByNumber(String number) {
         OrderEntity entity = orderRepository.findByNumber(number)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Order number=%s not found".formatted(number)
-                ));
+                .orElseThrow(() -> new OrderNotFoundException(number));
 
         return toDto(toDomain(entity));
     }
@@ -128,7 +125,7 @@ public class OrderServiceImpl implements OrderService {
 
         List<Product> products = productRepository.findAllById(domain.getProductIds());
         if (products.size() != domain.getProductIds().size()) {
-            throw new ValidationException("Some products not found for ids: " + domain.getProductIds());
+            throw new ProductsForOrderNotFoundException(domain.getProductIds());
         }
 
         OrderEntity saved = orderRepository.save(toEntity(domain, products));
@@ -140,9 +137,7 @@ public class OrderServiceImpl implements OrderService {
         validate(dto);
 
         OrderEntity existing = orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Order id=%d not found".formatted(id)
-                ));
+                .orElseThrow(() -> new OrderNotFoundException(id));
 
         Order domain = toDomain(existing);
         domain.setNumber(dto.getNumber());
@@ -152,7 +147,7 @@ public class OrderServiceImpl implements OrderService {
 
         List<Product> products = productRepository.findAllById(domain.getProductIds());
         if (products.size() != domain.getProductIds().size()) {
-            throw new ValidationException("Some products not found for ids: " + domain.getProductIds());
+            throw new ProductsForOrderNotFoundException(domain.getProductIds());
         }
 
         OrderEntity saved = orderRepository.save(toEntity(domain, products));
