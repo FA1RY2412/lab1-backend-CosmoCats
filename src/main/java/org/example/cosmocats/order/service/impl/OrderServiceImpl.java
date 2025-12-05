@@ -122,7 +122,7 @@ class OrderServiceImplTest {
                 List.of(1L, 2L)
         );
 
-        // знайдено тільки 1 продукт з 2 → повинна впасти наша кастомна помилка
+        
         when(productRepository.findAllById(List.of(1L, 2L)))
                 .thenReturn(List.of(product1));
 
@@ -133,7 +133,7 @@ class OrderServiceImplTest {
     @Test
     void create_missingNumber_validationError() {
         OrderCreateUpdateDto dto = new OrderCreateUpdateDto(
-                "   ",          // пустий number
+                "   ",          
                 "Cat",
                 "NEW",
                 List.of(1L)
