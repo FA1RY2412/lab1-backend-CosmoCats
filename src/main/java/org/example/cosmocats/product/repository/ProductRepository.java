@@ -14,7 +14,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         select p.id as productId,
                p.name as productName,
                count(o.id) as ordersCount
-        from Order o
+        from OrderEntity o
             join o.products p
         group by p.id, p.name
         order by count(o.id) desc
