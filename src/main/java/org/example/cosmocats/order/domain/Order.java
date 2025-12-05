@@ -11,7 +11,7 @@ public class Order {
     private String customerName;
     private String status;
     private Instant createdAt;
-    // на domain-рівні зберігаємо тільки id продуктів
+    
     private List<Long> productIds = new ArrayList<>();
 
     public Order() {
