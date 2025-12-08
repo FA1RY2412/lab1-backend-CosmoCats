@@ -278,12 +278,14 @@ class OrderServiceImplTest {
 
     @Test
     void delete_whenOrderExists_deletesIt() {
-        when(orderRepository.existsById(100L)).thenReturn(true);
-
-        service.delete(100L);
-
-        verify(orderRepository).existsById(100L);
-        verify(orderRepository).deleteById(100L);
+        Long id = 100L;
+    
+        when(orderRepository.existsById(id)).thenReturn(true);
+    
+        service.delete(id);
+    
+        verify(orderRepository).existsById(id);
+        verify(orderRepository).deleteById(id);
     }
     
         @Test
