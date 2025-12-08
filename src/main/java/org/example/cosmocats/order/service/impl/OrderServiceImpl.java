@@ -156,9 +156,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void delete(Long id) {
-        if (orderRepository.existsById(id)) {
-            orderRepository.deleteById(id);
+        if (!orderRepository.existsById(id)) {
+            throw new OrderNotFoundException(id);
         }
+        orderRepository.deleteById(id);
     }
 
     private void validate(OrderCreateUpdateDto dto) {
