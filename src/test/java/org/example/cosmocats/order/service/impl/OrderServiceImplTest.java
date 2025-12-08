@@ -9,6 +9,7 @@ import org.example.cosmocats.order.repository.OrderRepository;
 import org.example.cosmocats.order.service.OrderService;
 import org.example.cosmocats.product.entity.Product;
 import org.example.cosmocats.product.repository.ProductRepository;
+import org.example.cosmocats.order.exception.OrderNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
