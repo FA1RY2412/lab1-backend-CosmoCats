@@ -284,4 +284,19 @@ class OrderServiceImplTest {
         verify(orderRepository).existsById(100L);
         verify(orderRepository).deleteById(100L);
     }
+    
+        @Test
+    void delete_whenOrderDoesNotExist_throwsNotFound() {
+        Long id = 999L;
+        when(orderRepository.existsById(id)).thenReturn(false);
+    
+        assertThrows(
+                OrderNotFoundException.class,
+                () -> service.delete(id)
+        );
+    
+        verify(orderRepository).existsById(id);
+        verify(orderRepository, never()).deleteById(anyLong());
+    }
+
 }
