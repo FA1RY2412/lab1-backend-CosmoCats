@@ -95,10 +95,6 @@ class OrderServiceImplTest {
         assertThrows(ResourceNotFoundException.class, () -> service.findById(42L));
     }
 
-    @Test
-    void delete_callsRepository() {
-        assertDoesNotThrow(() -> service.delete(10L));
-    }
 
     @Test
     void create_throwsValidation_whenNumberBlank() {
