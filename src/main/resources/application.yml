@@ -1,25 +1,18 @@
 spring:
-  sql:
-    init:
-      mode: never
   datasource:
-    url: jdbc:h2:mem:cosmocats;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
-    driverClassName: org.h2.Driver
-    username: sa
-    password: password
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:cosmo_cats}
+    username: ${DB_USERNAME:cosmo}
+    password: ${DB_PASSWORD:cosmo}
+    driverClassName: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-    open-in-view: false
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yml
 server:
   port: 8080
 
@@ -33,3 +26,8 @@ logging:
   level:
     root: INFO
     org.springframework: INFO
+    
+feature-toggle:
+  toggles:
+    cosmo-cats: true
+    kitty-products: false

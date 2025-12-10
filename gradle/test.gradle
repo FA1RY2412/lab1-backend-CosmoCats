@@ -1,0 +1,65 @@
+// Split test tasks (unit vs integration) and common settings
+sourceSets {
+    test {
+        java.srcDirs = ['src/test/java']
+        resources.srcDirs = ['src/test/resources']
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+    // Optional integration tests if you decide to add them later
+    if (!sourceSets.findByName('integrationTest')) {
+        create('integrationTest') {
+            java.srcDirs = ['src/integrationTest/java']
+            resources.srcDirs = ['src/integrationTest/resources']
+            compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
+            runtimeClasspath += output + compileClasspath
+        }
+    }
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+// Integration test task (skipped if no sources)
+tasks.register('integrationTest', Test) {
+    description = 'Runs integration tests.'
+    group = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    useJUnitPlatform()
+    onlyIf {
+        file('src/integrationTest/java').exists()
+    }
+    shouldRunAfter test
+}
+
+// Aggregate reports (unit + integration) if integration tests present
+tasks.register('jacocoAllTestReport', JacocoReport) {
+    group = "verification"
+    description = "Generates a combined Jacoco report for unit and (optional) integration tests."
+    dependsOn test
+    if (tasks.findByName('integrationTest')) {
+        dependsOn integrationTest
+    }
+    reports {
+        html.required = true
+        xml.required  = true
+        csv.required  = false
+    }
+
+    def unitExec = file("${buildDir}/jacoco/test.exec")
+    def itExec   = file("${buildDir}/jacoco/integrationTest.exec")
+
+    executionData.from = files(unitExec, itExec).filter { it.exists() }
+
+    afterEvaluate {
+        classDirectories.setFrom(
+            files(sourceSets.main.output).asFileTree.matching {
+                exclude filesExcludedFromCoverage
+            }
+        )
+        sourceDirectories.setFrom files(sourceSets.main.allSource.srcDirs)
+    }
+}

@@ -1,0 +1,57 @@
+
+ext {
+    minimumCoveragePerFile = (hasProperty('minimumCoveragePerFile') ? minimumCoveragePerFile : 0.50) as BigDecimal
+    filesExcludedFromCoverage = (hasProperty('filesExcludedFromCoverage') ? filesExcludedFromCoverage : []) as List
+}
+
+jacoco {
+    toolVersion = '0.8.11'
+}
+
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    finalizedBy tasks.named("jacocoTestReport")
+    testLogging {
+        events "FAILED", "SKIPPED"
+        exceptionFormat "full"
+        showExceptions true
+        showCauses true
+        showStackTraces true
+    }
+    systemProperty "file.encoding", "UTF-8"
+    systemProperty "user.language", "en"
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        html.required = true
+        xml.required  = true
+        csv.required  = false
+    }
+
+    doFirst {
+        classDirectories.setFrom(
+            files(classDirectories.files.collect { fileTree(dir: it, exclude: filesExcludedFromCoverage) })
+        )
+    }
+}
+
+jacocoTestCoverageVerification {
+    dependsOn test
+    violationRules {
+        rule {
+            element = 'CLASS'
+            limit {
+                counter = 'INSTRUCTION'
+                value   = 'COVEREDRATIO'
+                minimum = minimumCoveragePerFile
+            }
+            excludes = filesExcludedFromCoverage
+        }
+    }
+}
+
+
+check.dependsOn jacocoTestCoverageVerification
