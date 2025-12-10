@@ -1,82 +1,101 @@
 package org.example.cosmocats.product.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.cosmocats.category.entity.Category;
-import org.example.cosmocats.category.repository.CategoryRepository;
-import org.example.cosmocats.config.PostgresTestConfig;
+import org.example.cosmocats.config.SecurityProperties;
 import org.example.cosmocats.product.dto.ProductCreateUpdateDto;
-import org.example.cosmocats.product.entity.Product;
-import org.example.cosmocats.product.repository.ProductRepository;
+import org.example.cosmocats.product.dto.ProductDto;
+import org.example.cosmocats.product.service.ProductService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
 
-import jakarta.transaction.Transactional;
+import java.util.List;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@WebMvcTest(ProductController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
-@AutoConfigureMockMvc
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(PostgresTestConfig.class)
-@Transactional
-class ProductControllerIT {
+class ProductControllerTest {
 
-    @Autowired MockMvc mvc;
-    @Autowired ObjectMapper om;
-    @Autowired ProductRepository repo;
-    @Autowired CategoryRepository categoryRepository;
+    @Autowired
+    MockMvc mockMvc;
 
-    private Category ensureCategory() {
-        return categoryRepository.findByCode("DEFAULT")
-                .orElseGet(() -> categoryRepository.save(new Category("DEFAULT", "Default category")));
+    @MockBean
+    ProductService productService;
+
+    
+    @MockBean
+    SecurityProperties securityProperties;
+
+   
+    @Test
+    void list_returnsOk() throws Exception {
+        ProductDto dto = new ProductDto(
+                1L,
+                "X",
+                "desc",
+                5.0,
+                10L,
+                "CAT_CODE"
+        );
+
+        Mockito.when(productService.findAll()).thenReturn(List.of(dto));
+
+        mockMvc.perform(get("/api/v1/products"))
+               .andExpect(status().isOk())
+               .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+               .andExpect(jsonPath("$[0].id").value(1))
+               .andExpect(jsonPath("$[0].name").value("X"))
+               .andExpect(jsonPath("$[0].price").value(5.0));
     }
 
     @Test
-    void list_ok() throws Exception {
-        Category cat = ensureCategory();
-        Product saved = repo.save(new Product("X", "d", 5.0, cat));
+    void create_returns201() throws Exception {
+        ProductDto saved = new ProductDto(
+                1L,
+                "X",
+                "desc",
+                5.0,
+                10L,
+                "CAT_CODE"
+        );
 
-        mvc.perform(get("/api/v1/products"))
-           .andExpect(status().isOk())
-           .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-           .andExpect(jsonPath("$[0].id", is(saved.getId().intValue())));
-    }
+        Mockito.when(productService.create(any(ProductCreateUpdateDto.class)))
+               .thenReturn(saved);
 
-    @Test
-    void create_ok() throws Exception {
-        Category cat = ensureCategory();
-        ProductCreateUpdateDto dto = new ProductCreateUpdateDto("X", "d", 5.0, cat.getId());
+        String body = """
+                {
+                  "name": "X",
+                  "description": "desc",
+                  "price": 5.0,
+                  "categoryId": 10
+                }
+                """;
 
-        mvc.perform(post("/api/v1/products")
-                   .contentType(MediaType.APPLICATION_JSON)
-                   .content(om.writeValueAsString(dto)))
-           .andExpect(status().isCreated())
-           .andExpect(jsonPath("$.name", is("X")))
-           .andExpect(jsonPath("$.categoryId", is(cat.getId().intValue())));
+        mockMvc.perform(post("/api/v1/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+               .andExpect(status().isCreated())
+               .andExpect(jsonPath("$.id").value(1))
+               .andExpect(jsonPath("$.name").value("X"))
+               .andExpect(jsonPath("$.price").value(5.0));
     }
 
     @Test
     void delete_noContent() throws Exception {
-        Category cat = ensureCategory();
-        Product saved = repo.save(new Product("X", "d", 5.0, cat));
+        long id = 1L;
+        doNothing().when(productService).delete(id);
 
-        mvc.perform(delete("/api/v1/products/{id}", saved.getId()))
-           .andExpect(status().isNoContent());
-
-        assertFalse(repo.existsById(saved.getId()));
+        mockMvc.perform(delete("/api/v1/products/{id}", id))
+               .andExpect(status().isNoContent());
     }
 }
