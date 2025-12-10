@@ -13,7 +13,6 @@ import org.example.cosmocats.product.entity.Product;
 import org.example.cosmocats.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.time.Instant;
 import java.util.List;
@@ -87,7 +86,6 @@ public class OrderServiceImpl implements OrderService {
     
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'API')")
     @Transactional(readOnly = true)
     public List<OrderDto> findAll() {
         return orderRepository.findAll().stream()
@@ -97,7 +95,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'API')")
     @Transactional(readOnly = true)
     public OrderDto findById(Long id) {
         OrderEntity entity = orderRepository.findById(id)
@@ -107,7 +104,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'API')")
     @Transactional(readOnly = true)
     public OrderDto findByNumber(String number) {
         OrderEntity entity = orderRepository.findByNumber(number)
@@ -117,7 +113,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'API')")
     public OrderDto create(OrderCreateUpdateDto dto) {
         validate(dto);
 
@@ -138,7 +133,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'API')")
     public OrderDto update(Long id, OrderCreateUpdateDto dto) {
         validate(dto);
 
@@ -161,7 +155,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public void delete(Long id) {
         if (!orderRepository.existsById(id)) {
             throw new OrderNotFoundException(id);

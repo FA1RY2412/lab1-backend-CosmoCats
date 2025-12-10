@@ -9,7 +9,6 @@ import org.example.cosmocats.common.exception.ValidationException;
 import org.example.cosmocats.category.service.CategoryService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -24,7 +23,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'API')")
     public CategoryDto create(CategoryCreateUpdateDto dto) {
         if (categoryRepository.existsByCode(dto.getCode())) {
             throw new ValidationException("Category with code '%s' already exists".formatted(dto.getCode()));
@@ -36,7 +34,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'API')")
     @Transactional(readOnly = true)
     public List<CategoryDto> findAll() {
         return categoryRepository.findAll()
@@ -46,7 +43,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'API')")
     @Transactional(readOnly = true)
     public CategoryDto findById(Long id) {
         Category category = categoryRepository.findById(id)
@@ -55,7 +51,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'API')")
     public CategoryDto update(Long id, CategoryCreateUpdateDto dto) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category %d not found".formatted(id)));
@@ -67,7 +62,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public void delete(Long id) {
         categoryRepository.deleteById(id);
     }

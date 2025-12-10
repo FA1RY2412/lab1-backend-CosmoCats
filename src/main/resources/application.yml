@@ -31,11 +31,3 @@ feature-toggle:
   toggles:
     cosmo-cats: true
     kitty-products: false
-
-security:
-  api-key-header: X-API-KEY
-  api-key: cosmo-cats-api-key
-  jwt:
-    secret: cosmo-cats-jwt-secret
-    jws-algorithm: HS256
-    roles-claim: roles

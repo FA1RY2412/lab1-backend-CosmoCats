@@ -1,101 +1,82 @@
 package org.example.cosmocats.product.controller;
 
-import org.example.cosmocats.config.SecurityProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.cosmocats.category.entity.Category;
+import org.example.cosmocats.category.repository.CategoryRepository;
+import org.example.cosmocats.config.PostgresTestConfig;
 import org.example.cosmocats.product.dto.ProductCreateUpdateDto;
-import org.example.cosmocats.product.dto.ProductDto;
-import org.example.cosmocats.product.service.ProductService;
+import org.example.cosmocats.product.entity.Product;
+import org.example.cosmocats.product.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.ActiveProfiles;
 
-import java.util.List;
+import jakarta.transaction.Transactional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(ProductController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@SpringBootTest
 @ActiveProfiles("test")
-class ProductControllerTest {
+@AutoConfigureMockMvc
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(PostgresTestConfig.class)
+@Transactional
+class ProductControllerIT {
 
-    @Autowired
-    MockMvc mockMvc;
+    @Autowired MockMvc mvc;
+    @Autowired ObjectMapper om;
+    @Autowired ProductRepository repo;
+    @Autowired CategoryRepository categoryRepository;
 
-    @MockBean
-    ProductService productService;
-
-    
-    @MockBean
-    SecurityProperties securityProperties;
-
-   
-    @Test
-    void list_returnsOk() throws Exception {
-        ProductDto dto = new ProductDto(
-                1L,
-                "X",
-                "desc",
-                5.0,
-                10L,
-                "CAT_CODE"
-        );
-
-        Mockito.when(productService.findAll()).thenReturn(List.of(dto));
-
-        mockMvc.perform(get("/api/v1/products"))
-               .andExpect(status().isOk())
-               .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-               .andExpect(jsonPath("$[0].id").value(1))
-               .andExpect(jsonPath("$[0].name").value("X"))
-               .andExpect(jsonPath("$[0].price").value(5.0));
+    private Category ensureCategory() {
+        return categoryRepository.findByCode("DEFAULT")
+                .orElseGet(() -> categoryRepository.save(new Category("DEFAULT", "Default category")));
     }
 
     @Test
-    void create_returns201() throws Exception {
-        ProductDto saved = new ProductDto(
-                1L,
-                "X",
-                "desc",
-                5.0,
-                10L,
-                "CAT_CODE"
-        );
+    void list_ok() throws Exception {
+        Category cat = ensureCategory();
+        Product saved = repo.save(new Product("X", "d", 5.0, cat));
 
-        Mockito.when(productService.create(any(ProductCreateUpdateDto.class)))
-               .thenReturn(saved);
+        mvc.perform(get("/api/v1/products"))
+           .andExpect(status().isOk())
+           .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+           .andExpect(jsonPath("$[0].id", is(saved.getId().intValue())));
+    }
 
-        String body = """
-                {
-                  "name": "X",
-                  "description": "desc",
-                  "price": 5.0,
-                  "categoryId": 10
-                }
-                """;
+    @Test
+    void create_ok() throws Exception {
+        Category cat = ensureCategory();
+        ProductCreateUpdateDto dto = new ProductCreateUpdateDto("X", "d", 5.0, cat.getId());
 
-        mockMvc.perform(post("/api/v1/products")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-               .andExpect(status().isCreated())
-               .andExpect(jsonPath("$.id").value(1))
-               .andExpect(jsonPath("$.name").value("X"))
-               .andExpect(jsonPath("$.price").value(5.0));
+        mvc.perform(post("/api/v1/products")
+                   .contentType(MediaType.APPLICATION_JSON)
+                   .content(om.writeValueAsString(dto)))
+           .andExpect(status().isCreated())
+           .andExpect(jsonPath("$.name", is("X")))
+           .andExpect(jsonPath("$.categoryId", is(cat.getId().intValue())));
     }
 
     @Test
     void delete_noContent() throws Exception {
-        long id = 1L;
-        doNothing().when(productService).delete(id);
+        Category cat = ensureCategory();
+        Product saved = repo.save(new Product("X", "d", 5.0, cat));
 
-        mockMvc.perform(delete("/api/v1/products/{id}", id))
-               .andExpect(status().isNoContent());
+        mvc.perform(delete("/api/v1/products/{id}", saved.getId()))
+           .andExpect(status().isNoContent());
+
+        assertFalse(repo.existsById(saved.getId()));
     }
 }
