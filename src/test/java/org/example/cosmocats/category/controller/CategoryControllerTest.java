@@ -4,6 +4,7 @@ import org.example.cosmocats.category.dto.CategoryCreateUpdateDto;
 import org.example.cosmocats.category.dto.CategoryDto;
 import org.example.cosmocats.category.service.CategoryService;
 import org.example.cosmocats.common.exception.ResourceNotFoundException;
+import org.example.cosmocats.security.SecurityTestConfig;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.context.annotation.Import;
+
+
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -20,7 +27,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.util.List;
 
 
-@WebMvcTest(CategoryController.class)
+@WebMvcTest(controllers = CategoryController.class)
+@AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
+@Import(SecurityTestConfig.class)
 class CategoryControllerTest {
 
     @Autowired
