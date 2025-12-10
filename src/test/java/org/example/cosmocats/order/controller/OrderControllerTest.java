@@ -4,20 +4,13 @@ import org.example.cosmocats.order.dto.OrderCreateUpdateDto;
 import org.example.cosmocats.order.dto.OrderDto;
 import org.example.cosmocats.order.service.OrderService;
 import org.example.cosmocats.common.exception.ResourceNotFoundException;
-import org.example.cosmocats.security.SecurityTestConfig;
 import org.junit.jupiter.api.Test;
-
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.context.annotation.Import;
-
 
 import java.time.Instant;
 import java.util.List;
@@ -27,10 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@WebMvcTest(controllers = OrderController.class)
-@AutoConfigureMockMvc(addFilters = false)
-@ActiveProfiles("test")
-@Import(SecurityTestConfig.class)
+@WebMvcTest(OrderController.class)
 class OrderControllerTest {
 
     @Autowired

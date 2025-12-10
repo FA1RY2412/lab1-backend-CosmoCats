@@ -11,7 +11,6 @@ import org.example.cosmocats.product.repository.ProductRepository;
 import org.example.cosmocats.product.service.ProductService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -39,14 +38,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'API')")
     @Transactional(readOnly = true)
     public List<ProductDto> findAll() {
         return productRepository.findAll().stream().map(this::toDto).toList();
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'API')")
     @Transactional(readOnly = true)
     public ProductDto findById(Long id) {
         Product p = productRepository.findById(id)
@@ -55,7 +52,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'API')")
     public ProductDto create(ProductCreateUpdateDto dto) {
         validate(dto);
         Category category = categoryRepository.findById(dto.getCategoryId())
@@ -66,7 +62,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'API')")
     public ProductDto update(Long id, ProductCreateUpdateDto dto) {
         validate(dto);
         Product p = productRepository.findById(id)
@@ -81,7 +76,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public void delete(Long id) {
         if (productRepository.existsById(id)) {
             productRepository.deleteById(id);
