@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CosmoCats</a> &gt; <a href="index.source.html" class="el_package">org.example.cosmocats.order.entity</a> &gt; <span class="el_source">OrderEntity.java</span></div><h1>OrderEntity.java</h1><pre class="source lang-java linenums">package org.example.cosmocats.order.entity;
+
+import jakarta.persistence.*;
+import org.example.cosmocats.product.entity.Product;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(
+        name = &quot;orders&quot;,
+        uniqueConstraints = {
+                @UniqueConstraint(name = &quot;uk_orders_number&quot;, columnNames = &quot;number&quot;)
+        }
+)
+public class OrderEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = &quot;order_seq&quot;)
+    @SequenceGenerator(
+            name = &quot;order_seq&quot;,
+            sequenceName = &quot;order_seq&quot;,
+            allocationSize = 1
+    )
+    private Long id;
+
+
+    @Column(nullable = false, length = 64)
+    private String number;
+
+    @Column(name = &quot;customer_name&quot;, length = 128)
+    private String customerName;
+
+    @Column(length = 32)
+    private String status;
+
+<span class="fc" id="L38">    @Column(name = &quot;created_at&quot;)</span>
+<span class="fc" id="L39">    private Instant createdAt = Instant.now();</span>
+
+<span class="fc" id="L41">    @ManyToMany</span>
+    @JoinTable(
+            name = &quot;order_products&quot;,
+            joinColumns = @JoinColumn(name = &quot;order_id&quot;),
+            inverseJoinColumns = @JoinColumn(name = &quot;product_id&quot;)
+    )
+    private List&lt;Product&gt; products = new ArrayList&lt;&gt;();
+
+<span class="fc" id="L49">    public OrderEntity() {</span>
+<span class="fc" id="L50">    }</span>
+
+<span class="fc" id="L52">    public OrderEntity(String number, String customerName, String status) {</span>
+<span class="fc" id="L53">        this.number = number;</span>
+<span class="fc" id="L54">        this.customerName = customerName;</span>
+<span class="fc" id="L55">        this.status = status;</span>
+<span class="fc" id="L56">    }</span>
+
+<span class="fc" id="L58">    public Long getId() { return id; }</span>
+<span class="fc" id="L59">    public void setId(Long id) { this.id = id; }</span>
+
+<span class="fc" id="L61">    public String getNumber() { return number; }</span>
+<span class="fc" id="L62">    public void setNumber(String number) { this.number = number; }</span>
+
+<span class="fc" id="L64">    public String getCustomerName() { return customerName; }</span>
+<span class="fc" id="L65">    public void setCustomerName(String customerName) { this.customerName = customerName; }</span>
+
+<span class="fc" id="L67">    public String getStatus() { return status; }</span>
+<span class="fc" id="L68">    public void setStatus(String status) { this.status = status; }</span>
+
+<span class="fc" id="L70">    public Instant getCreatedAt() { return createdAt; }</span>
+<span class="fc" id="L71">    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }</span>
+
+<span class="fc" id="L73">    public List&lt;Product&gt; getProducts() { return products; }</span>
+<span class="fc" id="L74">    public void setProducts(List&lt;Product&gt; products) { this.products = products; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

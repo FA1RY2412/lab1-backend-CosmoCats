@@ -1,0 +1,8 @@
+security:
+  api-key: disabled
+  api-key-header: X-API-KEY
+
+  jwt:
+    secret: disabled
+    jws-algorithm: HS256
+    roles-claim: roles

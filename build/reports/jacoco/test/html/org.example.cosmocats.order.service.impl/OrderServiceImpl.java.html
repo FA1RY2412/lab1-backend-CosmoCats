@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CosmoCats</a> &gt; <a href="index.source.html" class="el_package">org.example.cosmocats.order.service.impl</a> &gt; <span class="el_source">OrderServiceImpl.java</span></div><h1>OrderServiceImpl.java</h1><pre class="source lang-java linenums">package org.example.cosmocats.order.service.impl;
+
+import org.example.cosmocats.common.exception.ValidationException;
+import org.example.cosmocats.order.dto.OrderCreateUpdateDto;
+import org.example.cosmocats.order.dto.OrderDto;
+import org.example.cosmocats.order.domain.Order;
+import org.example.cosmocats.order.entity.OrderEntity;
+import org.example.cosmocats.order.exception.OrderNotFoundException;
+import org.example.cosmocats.order.exception.ProductsForOrderNotFoundException;
+import org.example.cosmocats.order.repository.OrderRepository;
+import org.example.cosmocats.order.service.OrderService;
+import org.example.cosmocats.product.entity.Product;
+import org.example.cosmocats.product.repository.ProductRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import java.time.Instant;
+import java.util.List;
+
+@Service
+@Transactional
+public class OrderServiceImpl implements OrderService {
+
+    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+
+    public OrderServiceImpl(OrderRepository orderRepository,
+<span class="fc" id="L29">                            ProductRepository productRepository) {</span>
+<span class="fc" id="L30">        this.orderRepository = orderRepository;</span>
+<span class="fc" id="L31">        this.productRepository = productRepository;</span>
+<span class="fc" id="L32">    }</span>
+
+    
+
+    private Order toDomain(OrderEntity entity) {
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (entity == null) {</span>
+<span class="nc" id="L38">            return null;</span>
+        }
+
+<span class="fc" id="L41">        Order domain = new Order();</span>
+<span class="fc" id="L42">        domain.setId(entity.getId());</span>
+<span class="fc" id="L43">        domain.setNumber(entity.getNumber());</span>
+<span class="fc" id="L44">        domain.setCustomerName(entity.getCustomerName());</span>
+<span class="fc" id="L45">        domain.setStatus(entity.getStatus());</span>
+<span class="fc" id="L46">        domain.setCreatedAt(entity.getCreatedAt());</span>
+
+<span class="fc" id="L48">        List&lt;Long&gt; productIds = entity.getProducts().stream()</span>
+<span class="fc" id="L49">                .map(Product::getId)</span>
+<span class="fc" id="L50">                .toList();</span>
+<span class="fc" id="L51">        domain.setProductIds(productIds);</span>
+
+<span class="fc" id="L53">        return domain;</span>
+    }
+
+    
+
+    private OrderEntity toEntity(Order domain, List&lt;Product&gt; products) {
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if (domain == null) {</span>
+<span class="nc" id="L60">            return null;</span>
+        }
+
+<span class="fc" id="L63">        OrderEntity entity = new OrderEntity();</span>
+<span class="fc" id="L64">        entity.setId(domain.getId());</span>
+<span class="fc" id="L65">        entity.setNumber(domain.getNumber());</span>
+<span class="fc" id="L66">        entity.setCustomerName(domain.getCustomerName());</span>
+<span class="fc" id="L67">        entity.setStatus(domain.getStatus());</span>
+<span class="fc" id="L68">        entity.setCreatedAt(domain.getCreatedAt());</span>
+<span class="fc" id="L69">        entity.setProducts(products);</span>
+
+<span class="fc" id="L71">        return entity;</span>
+    }
+
+    
+
+    private OrderDto toDto(Order o) {
+<span class="fc" id="L77">        return new OrderDto(</span>
+<span class="fc" id="L78">                o.getId(),</span>
+<span class="fc" id="L79">                o.getNumber(),</span>
+<span class="fc" id="L80">                o.getCustomerName(),</span>
+<span class="fc" id="L81">                o.getStatus(),</span>
+<span class="fc" id="L82">                o.getCreatedAt(),</span>
+<span class="fc" id="L83">                o.getProductIds()</span>
+        );
+    }
+
+    
+
+    @Override
+    @PreAuthorize(&quot;hasAnyRole('ADMIN', 'API')&quot;)
+    @Transactional(readOnly = true)
+    public List&lt;OrderDto&gt; findAll() {
+<span class="fc" id="L93">        return orderRepository.findAll().stream()</span>
+<span class="fc" id="L94">                .map(this::toDomain)</span>
+<span class="fc" id="L95">                .map(this::toDto)</span>
+<span class="fc" id="L96">                .toList();</span>
+    }
+
+    @Override
+    @PreAuthorize(&quot;hasAnyRole('ADMIN', 'USER', 'API')&quot;)
+    @Transactional(readOnly = true)
+    public OrderDto findById(Long id) {
+<span class="fc" id="L103">        OrderEntity entity = orderRepository.findById(id)</span>
+<span class="pc" id="L104">                .orElseThrow(() -&gt; new OrderNotFoundException(id));</span>
+
+<span class="nc" id="L106">        return toDto(toDomain(entity));</span>
+    }
+
+    @Override
+    @PreAuthorize(&quot;hasAnyRole('ADMIN', 'USER', 'API')&quot;)
+    @Transactional(readOnly = true)
+    public OrderDto findByNumber(String number) {
+<span class="fc" id="L113">        OrderEntity entity = orderRepository.findByNumber(number)</span>
+<span class="fc" id="L114">                .orElseThrow(() -&gt; new OrderNotFoundException(number));</span>
+
+<span class="fc" id="L116">        return toDto(toDomain(entity));</span>
+    }
+
+    @Override
+    @PreAuthorize(&quot;hasAnyRole('USER', 'ADMIN', 'API')&quot;)
+    public OrderDto create(OrderCreateUpdateDto dto) {
+<span class="fc" id="L122">        validate(dto);</span>
+
+<span class="fc" id="L124">        Order domain = new Order();</span>
+<span class="fc" id="L125">        domain.setNumber(dto.getNumber());</span>
+<span class="fc" id="L126">        domain.setCustomerName(dto.getCustomerName());</span>
+<span class="fc" id="L127">        domain.setStatus(dto.getStatus());</span>
+<span class="fc" id="L128">        domain.setCreatedAt(Instant.now());</span>
+<span class="fc" id="L129">        domain.setProductIds(dto.getProductIds());</span>
+
+<span class="fc" id="L131">        List&lt;Product&gt; products = productRepository.findAllById(domain.getProductIds());</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">        if (products.size() != domain.getProductIds().size()) {</span>
+<span class="fc" id="L133">            throw new ProductsForOrderNotFoundException(domain.getProductIds());</span>
+        }
+
+<span class="fc" id="L136">        OrderEntity saved = orderRepository.save(toEntity(domain, products));</span>
+<span class="fc" id="L137">        return toDto(toDomain(saved));</span>
+    }
+
+    @Override
+    @PreAuthorize(&quot;hasAnyRole('USER', 'ADMIN', 'API')&quot;)
+    public OrderDto update(Long id, OrderCreateUpdateDto dto) {
+<span class="fc" id="L143">        validate(dto);</span>
+
+<span class="fc" id="L145">        OrderEntity existing = orderRepository.findById(id)</span>
+<span class="pc" id="L146">                .orElseThrow(() -&gt; new OrderNotFoundException(id));</span>
+
+<span class="fc" id="L148">        Order domain = toDomain(existing);</span>
+<span class="fc" id="L149">        domain.setNumber(dto.getNumber());</span>
+<span class="fc" id="L150">        domain.setCustomerName(dto.getCustomerName());</span>
+<span class="fc" id="L151">        domain.setStatus(dto.getStatus());</span>
+<span class="fc" id="L152">        domain.setProductIds(dto.getProductIds());</span>
+
+<span class="fc" id="L154">        List&lt;Product&gt; products = productRepository.findAllById(domain.getProductIds());</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        if (products.size() != domain.getProductIds().size()) {</span>
+<span class="fc" id="L156">            throw new ProductsForOrderNotFoundException(domain.getProductIds());</span>
+        }
+
+<span class="fc" id="L159">        OrderEntity saved = orderRepository.save(toEntity(domain, products));</span>
+<span class="fc" id="L160">        return toDto(toDomain(saved));</span>
+    }
+
+    @Override
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public void delete(Long id) {
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if (!orderRepository.existsById(id)) {</span>
+<span class="fc" id="L167">            throw new OrderNotFoundException(id);</span>
+        }
+<span class="fc" id="L169">        orderRepository.deleteById(id);</span>
+<span class="fc" id="L170">    }</span>
+
+    private void validate(OrderCreateUpdateDto dto) {
+<span class="fc bfc" id="L173" title="All 4 branches covered.">        if (dto.getNumber() == null || dto.getNumber().isBlank()) {</span>
+<span class="fc" id="L174">            throw new ValidationException(&quot;number is required&quot;);</span>
+        }
+<span class="pc bpc" id="L176" title="1 of 4 branches missed.">        if (dto.getProductIds() == null || dto.getProductIds().isEmpty()) {</span>
+<span class="fc" id="L177">            throw new ValidationException(&quot;productIds is required&quot;);</span>
+        }
+<span class="fc" id="L179">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
